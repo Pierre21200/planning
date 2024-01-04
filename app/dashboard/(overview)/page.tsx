@@ -14,7 +14,7 @@ import ExcelUploadForm from '../../ui/ExcelUploadForm';
 export default async function Page() {
 
   return (
-  <main className="min-h-full w-full flex justify-center items-center">  
+  <main className="min-h-full w-full flex justify-between items-center">  
    <ExcelUploadForm/>  
   </main>
   );

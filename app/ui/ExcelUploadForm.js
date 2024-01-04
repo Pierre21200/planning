@@ -4,17 +4,11 @@
 import { useState } from 'react';
 
 const ExcelUploadForm = () => {
-
-
   // Utilisez useState pour gérer l'état du fichier
   const [file, setFile] = useState(null);
   const [data, setData] = useState(null);
-  
-  const [dataDays, setDataDays] = useState([])
 
-  const [lmatin, setLmatin] = useState(0)
-  const [lsoir, setLsoir] = useState(0)
-
+  const [dataDays, setDataDays] = useState([]);
 
   const handleFileChange = async (event) => {
     setFile(event.target.files[0]);
@@ -41,55 +35,97 @@ const ExcelUploadForm = () => {
 
       setData(responseData);
 
-      let tab = []
+      let tab = [];
 
-
-
-      
       const calculateAndSetHeights = (dayData) => {
-        if(dayData[0] === 'congé') {
-          tab.push('0', '0')
+        if (dayData[0] === 'congé') {
+          tab.push('0', '0');
         } else {
           const matchResult = dayData[0].match(/(\d+)(?:h(\d+))?/);
           const heures = parseInt(matchResult[1], 10);
           const minutes = matchResult[2] ? parseInt(matchResult[2], 10) : 0;
           const m = heures + minutes / 60;
           const ma = (m - 7) * 20;
-  
+
           const matchResult2 = dayData[1].match(/(\d+)(?:h(\d+))?/);
           const heures2 = parseInt(matchResult2[1], 10);
           const minutes2 = matchResult2[2] ? parseInt(matchResult2[2], 10) : 0;
           const s = heures2 + minutes2 / 60;
-  
+
           const so = (s - m) * 20;
-          tab.push(ma,so)
+          tab.push(ma, so);
         }
       };
 
-      
-    const joursSemaine = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+      const joursSemaine = [
+        'lundi',
+        'mardi',
+        'mercredi',
+        'jeudi',
+        'vendredi',
+        'samedi',
+        'dimanche',
+      ];
 
-    for (const jour of joursSemaine) {
-      calculateAndSetHeights(responseData[jour]);
-    }
+      for (const jour of joursSemaine) {
+        calculateAndSetHeights(responseData[jour]);
+      }
 
-    setDataDays(tab)
-
-
+      setDataDays(tab);
     } catch (error) {
       console.error("Erreur lors de la requête d'upload :", error);
     }
   };
 
+  const WeekDays = ({ datas }) => {
+    const weekDays = [
+      'LUNDI',
+      'MARDI',
+      'MERCREDI',
+      'JEUDI',
+      'VENDREDI',
+      'SAMEDI',
+      'DIMANCHE',
+    ];
+
+    return (
+      <div className="relative my-5 flex h-[350px] w-full items-start justify-around rounded-2xl  border-[3px] border-[#5DAF24] bg-[#ADD791] py-5 font-bold text-white shadow-md shadow-[#ADD791]">
+        {weekDays.map((day, index) => (
+          <div key={index} className="h-full w-1/12">
+            <div
+              style={{ marginBottom: `${dataDays[index * 2]}px` }}
+              className={`flex h-1/6 items-center justify-center text-lg`}
+            >
+              {day}
+            </div>
+            {dataDays[index * 2] === '0' ? (
+              <div className="flex h-5/6 w-full flex-col items-center justify-center rounded-2xl border-2 border-white bg-[#5DAF24]">
+                <p>CONGÉ</p>
+              </div>
+            ) : (
+              <div
+                style={{ height: `${dataDays[index * 2 + 1]}px` }}
+                className="flex w-full flex-col items-center justify-between rounded-2xl border-2 border-white bg-[#5DAF24] py-3"
+              >
+                <p>{data[day.toLowerCase()][0]}</p>
+                <p>{data[day.toLowerCase()][1]}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="justify-beetwen relative flex w-full flex-col items-center ">
       <input
-        className="pointer absolute z-10 h-80 w-5/6 cursor-pointer rounded-[100px]  opacity-0 max-[500px]:w-full"
+        className="pointer absolute z-10 h-80 w-5/6 cursor-pointer rounded-[100px] border-2   opacity-0 max-[500px]:w-full"
         type="file"
         name="file"
         onChange={handleFileChange}
       />
-      <div className="relative z-0 flex flex h-80 w-5/6 flex-col items-center justify-between rounded-[100px] bg-[#ADD791] py-9 text-3xl font-bold text-white max-[500px]:w-full max-[500px]:text-xl">
+      <div className="relative z-0 flex flex h-80 w-5/6 flex-col items-center justify-between rounded-[100px] border-2 border-[#5DAF24] bg-[#ADD791] py-9 text-3xl font-bold text-white shadow-md shadow-[#5DAF24] max-[500px]:w-full max-[500px]:text-xl">
         {file ? file.name : 'CHOISIR UN FICHIER'}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -102,48 +138,13 @@ const ExcelUploadForm = () => {
         </svg>
       </div>
 
-      {data ? (
-    <div className="relative my-10 flex h-[300px] w-full  items-start justify-around border-2 border-black">
-          <div className="h-full w-1/12">
-           
-          <div style={{ marginBottom: `${dataDays[0]}px` }} className={`flex h-1/6 items-center justify-center`}>{window.innerWidth < 1024 ? 'Lun.' : 'Lundi'}</div>
-          <div style={{ height: `${dataDays[1]}px` }} className=  {` w-full border-2`}></div>
-          </div>
-          <div className="h-full w-1/12">
-          <div style={{ marginBottom: `${dataDays[2]}px` }} className={`flex h-1/6 justify-center items-center`}>Mardi</div>
-          <div style={{ height: `${dataDays[3]}px` }} className=  {` w-full border-2`}></div>
-          </div>
-          <div className="h-full w-1/12">
-          <div style={{ marginBottom: `${dataDays[4]}px` }} className={`flex h-1/6 justify-center items-center`}>Mercredi</div>
-          <div style={{ height: `${dataDays[5]}px` }} className=  {` w-full border-2`}></div>
-          </div>
-          <div className="h-full w-1/12">
-          <div style={{ marginBottom: `${dataDays[6]}px` }} className={`flex h-1/6 justify-center items-center`}>Jeudi</div>
-          <div style={{ height: `${dataDays[7]}px` }} className=  {` w-full border-2`}></div>
-          </div>
-          <div className="h-full w-1/12">
-          <div style={{ marginBottom: `${dataDays[8]}px` }} className={`flex h-1/6 justify-center items-center`}>Vendredi</div>
-          <div style={{ height: `${dataDays[9]}px` }} className={` w-full border-2`}></div>
-          </div>
-          <div className="h-full w-1/12">
-          <div style={{ marginBottom: `${dataDays[10]}px` }} className={`flex h-1/6 items-center justify-center`}>Samedi</div>
-          <div style={{ height: `${dataDays[11]}px` }} className={` w-full border-2`}></div>
-          </div>
-          <div className="h-full w-1/12">
-          <div style={{ marginBottom: `${dataDays[12]}px` }} className={`flex h-1/6 items-center justify-center`}>Dimanche</div>
-          <div style={{ height: `${dataDays[13]}px` }} className={` w-full border-2`}></div>
-          </div>
-        </div>
+      {dataDays.length !== 0 ? (
+        <WeekDays data={dataDays}></WeekDays>
       ) : (
         <div className="relative my-10 flex h-[300px] w-full  items-start justify-between border-2 border-black">
           <div className="h-full">
-            {/*  on va définir un margin bottom a la div contenant le nom de la journée pour définir l'heure de début de journée
-            on va définir une height à la div juste en dessous pour définir la durée de la journée
-             20px = 1heure
-              parseInt(data.lundi[0].match(/\d+/)[0], 10);
-             */}
-            <div className="flex h-1/6 items-center mb-[20px]">Lundi</div>
-            
+            <div className="mb-[20px] flex h-1/6 items-center">Lundi</div>
+
             <div className="h-[20px] w-full border-2"></div>
           </div>
           <div>Mardi</div>
@@ -159,6 +160,3 @@ const ExcelUploadForm = () => {
 };
 
 export default ExcelUploadForm;
-
-// 7/21
-// 300px, 280px (140 x 2) + 20px
