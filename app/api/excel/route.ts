@@ -1,21 +1,31 @@
-import { writeFile } from 'fs/promises';
 import { NextRequest, NextResponse } from 'next/server';
 const xlsx = require('xlsx');
 
 
 export async function POST(request: NextRequest) {
-    const data = await request.formData()
-    const file: File | null = data.get('file') as unknown as File
+  const data = await request.formData()
+      const file: File | null = data.get('file') as unknown as File
+    
+      if (!file) {
+        return NextResponse.json({ success: false })
+      }
+    
+      const bytes = await file.arrayBuffer()
+      const buffer = Buffer.from(bytes)
   
-    if (!file) {
-      return NextResponse.json({ success: false })
-    }
-  
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+      let horairesParJour: any = {
+        Lundi: [],
+        Mardi: [],
+        Mercredi: [],
+        Jeudi: [],
+        Vendredi: [],
+        Samedi: [],
+        Dimanche: []
+      };
+      
+    
 
-    let horairesParJour : any;
-    try {
+      try {
       // Lire le contenu du fichier Excel
       const workbook = xlsx.read(buffer, { type: 'buffer' })
   
@@ -25,135 +35,314 @@ export async function POST(request: NextRequest) {
   
       // Convertir le contenu de la feuille en format JSON
       const jsonData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
-  
-      // On cherche la ligne ou se trouve MF
-      let mfline = null;
-  
-      for (
-        let rowIndex = 0;
-        rowIndex < jsonData.length && mfline === null;
-        rowIndex++
-      ) {
-        for (let colIndex = 0; colIndex < jsonData[rowIndex].length; colIndex++) {
-          if (jsonData[rowIndex][colIndex] === "JB") {
-            mfline = rowIndex + 1;
-            break;
-          }
-        }
-      }
-  
-      let mfIndices = [];
-      let h = [];
-  
-      // On stocke chaque colonne ou se trouve MF dans notre ligne
-      for (let i = 0; i < jsonData[6].length; i++) {
-        if (jsonData[6][i] === "JB") {
-          mfIndices.push(i);
-        }
-      }
-  
-      // On va itérer sur chaque colonne ou se trouve MF
-      // Pour en tirer des informations
-      for (let index = 0; index < mfIndices.length; index++) {
-        let consecutiveMF = 0;
-        let consecutiveNotMF = 0;
-        let begin = false;
-        let conge = 0;
-  
-        for (let rowIndex = 6; rowIndex < jsonData.length; rowIndex++) {
-          const cellValue = jsonData[rowIndex][mfIndices[index]];
-          // console.log(rowIndex, mfIndices[index])
-  
-          if (cellValue === "JB") {
-            consecutiveMF++;
-            // console.log(rowIndex, consecutiveMF)
-  
-            if (consecutiveMF === 2) {
-              begin = true;
-              if (rowIndex % 2 === 1) {
-                let heures = jsonData[rowIndex][0];
-                let parties = heures.split("-");
-                let premierePartie = parties[0];
-                h.push(premierePartie);
-              } else {
-                let heures = jsonData[rowIndex - 1][0];
-                let parties = heures.split("-");
-                let premierePartie = parties[0] + "30";
-                h.push(premierePartie);
-              }
-  
-              conge = 0;
+
+      // On va isoler chaque journée dans un JSON
+          const lundiJson = [];
+          const mardiJson = [];
+          const mercrediJson = [];
+          const jeudiJson = [];
+          const vendrediJson = [];
+          const samediJson = [];
+          const dimancheJson = [];
+
+          // On part du principe que les jours se trouvent toujours sur la meme ligne, donc a changer au besoin en recherchant et en definissant plus haut sur quelle ligne on trouve lundi
+          for (let ligne = 4; ligne < 46; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 0; colonne < 40; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
             }
-          } else {
-            if (begin === true) {
-              consecutiveNotMF++;
-              if (consecutiveNotMF === 3) {
-                if (rowIndex % 2 === 1) {
-                  let heures = jsonData[rowIndex][0];
-                  let parties = heures.split("-");
-                  let premierePartie = parties[0];
-                  h.push(premierePartie);
-                } else {
-                  let heures = jsonData[rowIndex - 1][0];
-                  let parties = heures.split("-");
-                  let premierePartie = parties[0] + "30";
-                  h.push(premierePartie);
-                }
-  
-                begin = false;
-                consecutiveMF = 0;
-                consecutiveNotMF = 0;
-              }
-            } else {
-              conge++;
-              if (conge === 55) {
-                // console.log('conge',rowIndex, mfIndices[index])
-                console.log(rowIndex);
-                h.push("congé", " congé");
-                conge = 0;
-              }
+            lundiJson.push(ligneJson);
+          }
+
+          for (let ligne = 4; ligne < 46; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 41; colonne < 80; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
+            }
+            mardiJson.push(ligneJson);
+          }
+
+          for (let ligne = 4; ligne < 46; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 81; colonne < 120; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
+            }
+            mercrediJson.push(ligneJson);
+          }
+
+          
+          for (let ligne = 48; ligne < 88; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 0; colonne < 40; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
+            }
+            jeudiJson.push(ligneJson);
+          }
+
+
+          for (let ligne = 48; ligne < 88; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 41; colonne < 80; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
+            }
+            vendrediJson.push(ligneJson);
+          }
+
+          for (let ligne = 92; ligne < 132; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 0; colonne < 40; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
+            }
+            samediJson.push(ligneJson);
+          }
+
+          for (let ligne = 92; ligne < 132; ligne++) {
+            const ligneJson = [];
+            for (let colonne = 41; colonne < 80; colonne++) {
+              ligneJson.push(jsonData[ligne][colonne]);
+            }
+            dimancheJson.push(ligneJson);
+          }
+
+
+          
+          console.log('Lundi, Jeudi et Samedi ont le même nombre de ligne', lundiJson.length, 'et de colonne', lundiJson[0].length)
+          console.log('Leur dernière ligne est donc la ligne lundiJson[41], et leur dernière colonne est lundiJson[2][39], avec 2 car deux premières lignes ne sont quune colonne chacune')
+          console.log('Mardi, Mercredi, Vendredi et Dimanche ont le même nombre de ligne :', mardiJson.length, 'et de colonne', mardiJson[0].length)
+          console.log('Leur dernière ligne est donc la ligne mardiJson[41] et leur dernière colonne est mardiJson[2][38] avec 2 car deux premières lignes ne sont quune colonne chacune')
+          console.log('Attention, les premières lignes sont lundiJson[0][0]')
+
+          console.log(lundiJson[0][0], mardiJson[0][0], mercrediJson[0][0],jeudiJson[0][0],vendrediJson[0][0],samediJson[0][0],dimancheJson[0][0],)
+
+          let name = 'AE';
+          let indiceL : any;
+          let indiceM : any;
+          let indiceMe : any;
+          let indiceJ : any;
+          let indiceV : any;
+          let indiceS : any;
+          let indiceD : any;
+
+          for (let i = 0; i < lundiJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceL = i;
             }
           }
-        }
-  
-        // Avec le tableau h, on va vérifier combien d'objet avec l'index 0 existe(1, 2 ou 3), correspondant a Lundi Jeudi Samedi
-        // Pareil pour l'index 1, correspondant a Mardi Vendredi Dimanche
-        // Et index 2 pour Mercredi
+
+          for (let i = 0; i < mardiJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceM = i;
+            }
+          }
+
+          for (let i = 0; i < mercrediJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceMe = i;
+            }
+          }
+          for (let i = 0; i < jeudiJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceJ = i;
+            }
+          }
+          for (let i = 0; i < vendrediJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceV = i;
+            }
+          }
+          for (let i = 0; i < samediJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceS = i;
+            }
+          }
+          for (let i = 0; i < dimancheJson[2].length; i++) {
+            if (jsonData[6][i] === name) {
+              indiceD = i;
+            }
+          }       
+
+              
+        let consecutive : number = 0
+        let i = 6.5;
+        for (let rowIndex = 3; rowIndex < lundiJson.length; rowIndex++) {
+          i = i + 0.5
+          if(lundiJson[rowIndex][indiceL] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Lundi', i)
+              horairesParJour.Lundi.push(i)
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Lundi', i)
+              horairesParJour.Lundi.push(i)
+            }
+            consecutive = 0
+             
+          }
+
+         }
+
+         i = 6.5;
+         consecutive = 0
+         for (let rowIndex = 3; rowIndex < mardiJson.length; rowIndex++) {
+          i = i + 0.5
+          
+          if(mardiJson[rowIndex][indiceM - 1] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Mardi', i)
+              horairesParJour.Mardi.push(i)
+
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Mardi', i)
+              horairesParJour.Mardi.push(i)
+
+            }
+            consecutive = 0
+          }
+
+         }
+
+
+         i = 6.5;
+         consecutive = 0
+         for (let rowIndex = 3; rowIndex < mercrediJson.length; rowIndex++) {
+          i = i + 0.5
+
+          
+          if(mercrediJson[rowIndex][indiceM - 1] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Mercredi', i)
+              horairesParJour.Mercredi.push(i)
+
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Mercredi', i)
+              horairesParJour.Mercredi.push(i)
+
+            }
+            consecutive = 0
+          }
+
+         }
+
+
+         i = 6.5;
+         consecutive = 0
+         for (let rowIndex = 3; rowIndex < jeudiJson.length; rowIndex++) {
+          i = i + 0.5
+
+          
+          if(jeudiJson[rowIndex][indiceJ] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Jeudi', i)
+              horairesParJour.Jeudi.push(i)
+
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Jeudi', i)
+              horairesParJour.Jeudi.push(i)
+
+            }
+            consecutive = 0
+          }
+
+         }
+
+         i = 6.5;
+         consecutive = 0
+         for (let rowIndex = 3; rowIndex < vendrediJson.length; rowIndex++) {
+          i = i + 0.5
+
+          
+          if(vendrediJson[rowIndex][indiceV - 1] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Vendredi', i)
+              horairesParJour.Vendredi.push(i)
+
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Vendredi', i)
+              horairesParJour.Vendredi.push(i)
+
+            }
+            consecutive = 0
+          }
+
+         }
+
+         i = 6.5;
+         consecutive = 0
+         for (let rowIndex = 2; rowIndex < samediJson.length; rowIndex++) {
+          i = i + 0.5
+
+          
+          if(samediJson[rowIndex][indiceS] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Samedi', i)
+              horairesParJour.Samedi.push(i)
+
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Samedi', i)
+              horairesParJour.Samedi.push(i)
+
+            }
+            consecutive = 0
+          }
+
+         }
+
+
+         i = 6.5;
+         consecutive = 0
+         for (let rowIndex = 2; rowIndex < dimancheJson.length; rowIndex++) {
+          i = i + 0.5
+
+          
+          if(dimancheJson[rowIndex][indiceD - 1] === name) {
+            if (consecutive === 0) {
+              console.log(rowIndex,'début Dimanche', i)
+              horairesParJour.Dimanche.push(i)
+
+            }  
+            consecutive++;
+          }   
+          else {
+            if (consecutive !== 0) {
+              console.log(rowIndex,'fin Dimanche', i)
+              horairesParJour.Dimanche.push(i)
+
+            }
+            consecutive = 0
+          }
+
+         }
+
+      console.log(horairesParJour)
+
+      return NextResponse.json(horairesParJour)
+
+      } catch (error) {
+        
       }
-  
-      horairesParJour = {
-        lundi: [],
-        jeudi: [],
-        samedi: [],
-        mardi: [],
-        vendredi: [],
-        dimanche: [],
-        mercredi: [],
-      };
-  
-      // horairesParJour.lundi.push(h[0], h[1])
-      // horairesParJour.mardi.push(h[2], h[3])
-      for (let i = 0; i < Object.keys(horairesParJour).length; i++) {
-        let jour = Object.keys(horairesParJour)[i];
-  
-        // Ajouter les horaires correspondants pour chaque jour
-        horairesParJour[jour].push(h[i * 2], h[i * 2 + 1]);
-      }
-  
-  
-      console.log(horairesParJour);
-  
-      // const outputFilePath = "./output.json";
-      // fs.writeFileSync(outputFilePath, JSON.stringify(jsonData, null, 2));
-    } catch (error) {
-      console.error("Erreur lors de la lecture du fichier Excel:", error);
-    }
-
-
-   
-
-  
-    return NextResponse.json(horairesParJour)
-  }
+}
 
 
