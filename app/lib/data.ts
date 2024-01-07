@@ -1,4 +1,6 @@
 import { sql } from '@vercel/postgres';
+import { auth } from '@/auth';
+
 import {
   CustomerField,
   CustomersTableType,
@@ -129,16 +131,14 @@ export async function fetchFilteredInvoices(
 
 export async function fetchInvoicesPages(query: string) {
   noStore();
+  const userAuth = await auth()
+
+  const user = await sql`SELECT * FROM users WHERE email=${userAuth?.user?.email}`
+  const userId = user.rows[0].id
+
   try {
-    const count = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
+    const count = await sql` SELECT * FROM planning
+    WHERE user_id = ${userId}
   `;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);

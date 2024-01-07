@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 async function getUser(email: string): Promise<User | undefined> {
   try {
     const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
+    console.log(user)
     return user.rows[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
@@ -26,16 +27,16 @@ export const { auth, signIn, signOut } = NextAuth({
           .safeParse(credentials);
  
         if (parsedCredentials.success) {
+          
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
           if (!user) return null;
           const passwordsMatch = await bcrypt.compare(password, user.password);
 
-          if (passwordsMatch) return user;
+          if (passwordsMatch)  return { id: user.id, email: 'non' };
         }
         console.log('Invalid credentials');
         return null;
-
       },
     }),
   ],

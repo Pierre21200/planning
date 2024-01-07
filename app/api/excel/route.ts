@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(bytes)
   
       let horairesParJour: any = {
+        Semaine: [],
         Lundi: [],
         Mardi: [],
         Mercredi: [],
@@ -35,6 +36,11 @@ export async function POST(request: NextRequest) {
   
       // Convertir le contenu de la feuille en format JSON
       const jsonData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+
+      const semaineString = jsonData[0].find((cell : any) => cell && cell.includes('SEMAINE'));
+      horairesParJour.Semaine.push(semaineString)
+      // // On récupère la semaine concernée
 
       // On va isoler chaque journée dans un JSON
           const lundiJson = [];
@@ -111,10 +117,9 @@ export async function POST(request: NextRequest) {
           console.log('Mardi, Mercredi, Vendredi et Dimanche ont le même nombre de ligne :', mardiJson.length, 'et de colonne', mardiJson[0].length)
           console.log('Leur dernière ligne est donc la ligne mardiJson[41] et leur dernière colonne est mardiJson[2][38] avec 2 car deux premières lignes ne sont quune colonne chacune')
           console.log('Attention, les premières lignes sont lundiJson[0][0]')
-
           console.log(lundiJson[0][0], mardiJson[0][0], mercrediJson[0][0],jeudiJson[0][0],vendrediJson[0][0],samediJson[0][0],dimancheJson[0][0],)
 
-          let name = 'AE';
+          let name = 'MF';
           let indiceL : any;
           let indiceM : any;
           let indiceMe : any;

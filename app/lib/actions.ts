@@ -6,9 +6,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-// import { extractExcelContent } from './plan';
-// const fs = require('fs');
-// import * as xlsx from 'xlsx';
+import { auth } from '@/auth';
+
+
 
 const FormSchema = z.object({
   id: z.string(),
@@ -121,6 +121,70 @@ export async function deleteInvoice(id: string) {
     return { message: 'Database Error: Failed to Delete Invoice.' };
   }
 }
+
+
+export async function savePlanning(datas : any) {
+  const userAuth = await auth()
+  console.log(userAuth)
+  try {
+    const user = await sql`SELECT * FROM users WHERE email=${userAuth?.user?.email}`
+    const userId = user.rows[0].id
+       await sql `
+    INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
+    VALUES (
+      ${userId},
+      ${datas.Semaine[0]},
+      ${datas.Lundi},
+      ${datas.Mardi},
+      ${datas.Mercredi},
+      ${datas.Jeudi},
+      ${datas.Vendredi},
+      ${datas.Samedi},
+      ${datas.Dimanche}
+    )
+    ON CONFLICT (semaine) DO UPDATE SET
+      lundi = EXCLUDED.lundi,
+      mardi = EXCLUDED.mardi,
+      mercredi = EXCLUDED.mercredi,
+      jeudi = EXCLUDED.jeudi,
+      vendredi = EXCLUDED.vendredi,
+      samedi = EXCLUDED.samedi,
+      dimanche = EXCLUDED.dimanche;
+  `
+
+  return 'Ajouter réussi'
+  } catch (error) {
+    console.error('Error saving planning:', error);
+  }
+
+  //  try {
+  //   await sql `
+  //   INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
+  //   VALUES (
+  //     ${userId},
+  //     ${datas.Semaine[0]},
+  //     ${datas.Lundi},
+  //     ${datas.Mardi},
+  //     ${datas.Mercredi},
+  //     ${datas.Jeudi},
+  //     ${datas.Vendredi},
+  //     ${datas.Samedi},
+  //     ${datas.Dimanche}
+  //   )
+  //   ON CONFLICT (semaine) DO UPDATE SET
+  //     lundi = EXCLUDED.lundi,
+  //     mardi = EXCLUDED.mardi,
+  //     mercredi = EXCLUDED.mercredi,
+  //     jeudi = EXCLUDED.jeudi,
+  //     vendredi = EXCLUDED.vendredi,
+  //     samedi = EXCLUDED.samedi,
+  //     dimanche = EXCLUDED.dimanche;
+  // `
+  //  } catch (error) {
+    
+  //  }
+}
+
 
 
 

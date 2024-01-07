@@ -5,6 +5,7 @@ import styles from '@/app/ui/home.module.css';
 import { lusitana } from '@/app/ui/fonts';
 import Image from 'next/image';
 import { Metadata } from 'next';
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col p-6">
+      <main className="flex min-h-screen flex-col p-6">
       <div className="flex justify-center h-20 shrink-0 items-center rounded-lg bg-blanc-500 p-4 md:h-40 shadow-md">
       <Image
         src="/logoClinique.png"
@@ -60,5 +61,6 @@ export default function Page() {
         </div>
       </div>
     </main>
+
   );
 }

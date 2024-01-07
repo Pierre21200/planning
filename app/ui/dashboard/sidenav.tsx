@@ -8,7 +8,7 @@ import Image from 'next/image';
 
 export default function SideNav() {
   return (
-    <div className="flex h-full flex-col px-3 py-10 md:px-2 border-2 md:border-r-[#5DAF24] shadow-md shadow-[#5DAF24] items-center">
+    <div className="flex md:fixed h-full flex-col px-3 py-10 md:px-2 border-2 md:border-r-[#5DAF24] shadow-md shadow-[#5DAF24] items-center">
        <Image
         src="/logoClinique.png"
         width={200}

@@ -1,7 +1,8 @@
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
- 
+import { NextAuthProvider } from "./providers";
+
 export const metadata: Metadata = {
   title: {
     template: '%s | Acme Dashboard',
@@ -17,8 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
-      <body className={`${inter.className} antialiased`}>{children}</body>
+     <html lang="fr">
+      <body className={`${inter.className} antialiased`}>
+      {/* <NextAuthProvider> */}
+        {children}
+        {/* </NextAuthProvider>         */}
+        </body>
     </html>
+ 
   );
 }

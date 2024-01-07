@@ -2,12 +2,14 @@
 'use client';
 
 import { useState } from 'react';
+import { savePlanning } from '../lib/actions';
+import { useSession } from 'next-auth/react';
 
 const ExcelUploadForm = () => {
   // Utilisez useState pour gérer l'état du fichier
   const [file, setFile] = useState(null);
   const [data, setData] = useState(null);
-  // const [dataDays, setDataDays] = useState([]);
+  const [enr, setEnr] = useState(false);
 
   const handleFileChange = async (event) => {
     setFile(event.target.files[0]);
@@ -33,46 +35,15 @@ const ExcelUploadForm = () => {
       const responseData = await response.json();
 
       setData(responseData);
-
-      // let tab = [];
-
-      // const calculateAndSetHeights = (dayData) => {
-      //   if (dayData[0] === 'congé') {
-      //     tab.push('0', '0');
-      //   } else {
-      //     const matchResult = dayData[0].match(/(\d+)(?:h(\d+))?/);
-      //     const heures = parseInt(matchResult[1], 10);
-      //     const minutes = matchResult[2] ? parseInt(matchResult[2], 10) : 0;
-      //     const m = heures + minutes / 60;
-      //     const ma = (m - 7) * 20;
-
-      //     const matchResult2 = dayData[1].match(/(\d+)(?:h(\d+))?/);
-      //     const heures2 = parseInt(matchResult2[1], 10);
-      //     const minutes2 = matchResult2[2] ? parseInt(matchResult2[2], 10) : 0;
-      //     const s = heures2 + minutes2 / 60;
-
-      //     const so = (s - m) * 20;
-      //     tab.push(ma, so);
-      //   }
-      // };
-
-      // const joursSemaine = [
-      //   'lundi',
-      //   'mardi',
-      //   'mercredi',
-      //   'jeudi',
-      //   'vendredi',
-      //   'samedi',
-      //   'dimanche',
-      // ];
-
-      // for (const jour of joursSemaine) {
-      //   calculateAndSetHeights(responseData[jour]);
-      // }
-
-      // setDataDays(tab);
     } catch (error) {
       console.error("Erreur lors de la requête d'upload :", error);
+    }
+  };
+
+  const save = async (datas) => {
+    const response = await savePlanning(datas);
+    if (response === 'Ajouter réussi') {
+      setEnr(true);
     }
   };
 
@@ -140,19 +111,21 @@ const ExcelUploadForm = () => {
     ];
 
     return (
-      <div className="relative my-5 flex h-[460px] w-full items-start justify-around rounded-2xl  border-[3px] border-[#5DAF24] bg-[#ADD791] py-5 text-sm font-bold text-white shadow-md shadow-[#ADD791]">
-        {weekDays.map((day, index) => (
-          <div key={index} className="h-full w-1/12">
-            <div
-              style={{ marginBottom: `${(data[day][0] - 7) * 20 + 20}px` }}
-              className={`flex h-[20px] items-center justify-center lg:text-lg`}
-            >
-              {day.substring(0, 3)}.
+      <>
+        <div className="relative my-5 flex h-[500px] w-full items-start justify-around rounded-2xl  border-[3px] border-[#5DAF24] bg-[#ADD791] py-5 text-sm font-bold text-white shadow-md shadow-[#ADD791]">
+          {weekDays.map((day, index) => (
+            <div key={index} className="h-full w-1/12">
+              <div
+                style={{ marginBottom: `${(data[day][0] - 7) * 20 + 20}px` }}
+                className={`flex h-[20px] items-center justify-center lg:text-lg`}
+              >
+                {day.substring(0, 3)}.
+              </div>
+              {renderDayData(day, data)}
             </div>
-            {renderDayData(day, data)}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </>
     );
   };
 
@@ -182,9 +155,29 @@ const ExcelUploadForm = () => {
       </div>
 
       {data ? (
-        <WeekDays data={data}></WeekDays>
+        <>
+          <div className="flex w-full justify-center">
+            <p className="mt-10 text-2xl font-bold text-[#5DAF24]">
+              {data.Semaine[0]}
+            </p>
+          </div>
+          {enr ? (
+            <div className="mt-5 border-2 border-[#5DAF24] bg-[#5DAF24] p-2 font-bold text-white shadow-lg shadow-md">
+              Enregistré
+            </div>
+          ) : (
+            <button
+              onClick={() => save(data)}
+              className="mt-5 border-2 border-[#5DAF24] bg-[#ADD791] p-2 font-bold text-white shadow-md hover:bg-[#5DAF24] hover:shadow-lg"
+            >
+              Enregistrer
+            </button>
+          )}
+
+          <WeekDays data={data}></WeekDays>
+        </>
       ) : (
-        <div className="relative my-5 flex h-[460px] w-full items-center justify-center rounded-2xl border-[3px]  border-[#5DAF24] bg-[#ADD791] py-5 text-4xl font-bold text-white shadow-md shadow-[#ADD791]">
+        <div className="relative my-5 flex h-[500px] w-full items-center justify-center rounded-2xl border-[3px]  border-[#5DAF24] bg-[#ADD791] py-5 text-4xl font-bold text-white shadow-md shadow-[#ADD791]">
           <p>Aucun Fichier Sélectionné</p>
         </div>
       )}
