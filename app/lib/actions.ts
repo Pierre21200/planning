@@ -122,34 +122,34 @@ export async function deleteInvoice(id: string) {
   }
 }
 
+export async function getUserId() {
+  const userAuth = await auth()
+  const user = await sql`SELECT * FROM users WHERE email=${userAuth?.user?.email}`
+  const userId = user.rows[0].id
+
+  return userId;
+}
+
+
 
 export async function savePlanning(datas : any) {
-  const userAuth = await auth()
-  console.log(userAuth)
+  
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${userAuth?.user?.email}`
-    const userId = user.rows[0].id
+    const userId = await getUserId();
        await sql `
-    INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
-    VALUES (
-      ${userId},
-      ${datas.Semaine[0]},
-      ${datas.Lundi},
-      ${datas.Mardi},
-      ${datas.Mercredi},
-      ${datas.Jeudi},
-      ${datas.Vendredi},
-      ${datas.Samedi},
-      ${datas.Dimanche}
-    )
-    ON CONFLICT (semaine) DO UPDATE SET
-      lundi = EXCLUDED.lundi,
-      mardi = EXCLUDED.mardi,
-      mercredi = EXCLUDED.mercredi,
-      jeudi = EXCLUDED.jeudi,
-      vendredi = EXCLUDED.vendredi,
-      samedi = EXCLUDED.samedi,
-      dimanche = EXCLUDED.dimanche;
+       INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
+       VALUES (
+         ${userId},
+         ${datas.Semaine[0]},
+         ${datas.Lundi},
+         ${datas.Mardi},
+         ${datas.Mercredi},
+         ${datas.Jeudi},
+         ${datas.Vendredi},
+         ${datas.Samedi},
+         ${datas.Dimanche}
+       )
+       ON CONFLICT (user_id, semaine) DO NOTHING;
   `
 
   return 'Ajouter réussi'

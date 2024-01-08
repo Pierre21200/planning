@@ -57,6 +57,18 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
+export type PlanningData = {
+  id: string;
+  Semaine: string[];
+  Lundi: number;
+  Mardi: number;
+  Mercredi: number;
+  Jeudi: number;
+  Vendredi: number;
+  Samedi: number;
+  Dimanche: number;
+};
+
 export type CustomersTableType = {
   id: string;
   name: string;
