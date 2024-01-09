@@ -8,7 +8,7 @@ import { Metadata } from 'next';
 import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
-  title: 'Dashboard',
+  title: 'Accueil',
 };
 
 

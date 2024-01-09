@@ -95,9 +95,8 @@ export async function fetchCardData() {
 
 const ITEMS_PER_PAGE = 6;
 
-export async function fetchFilteredInvoices(query: string, currentPage: number) {
+export async function fetchFilteredInvoices() {
   noStore();
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
     const userId = await getUserId();
@@ -106,6 +105,7 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
       FROM planning
       WHERE user_id=${userId}
     `;
+ 
     return invoices.rows;
   } catch (error) {
     console.error('Database Error:', error);

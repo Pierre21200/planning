@@ -1,8 +1,11 @@
+
 import Image from 'next/image';
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
+import Planning from '../planning';
+
 
 export default async function InvoicesTable({
   query,
@@ -13,24 +16,9 @@ export default async function InvoicesTable({
 }) {
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
-  return (
-    <>
-      {invoices.length !== 0 ? (
-        invoices.map((invoice) => (
-          <div
-            className='mt-10 border-4 rounded-3xl border-[#5DAF24] font-bold p-10 text-2xl text-[#5DAF24] shadow-[#ADD791] shadow-md hover:shadow-lg hover:shadow-[#ADD791] cursor-pointer'
-            key={invoice.id}
-          >
-            {/* Remplacez le contenu ci-dessous avec les propriétés de votre objet invoice */}
-            <p>{invoice.semaine}</p>
-          </div>
-        ))
-      ) : (
-        <div className='mt-10 flex justify-center font-bold p-10 text-2xl text-[#5DAF24] '
-        >Aucun planning pour l'instant</div>
-      )}
-    </>
-  );
+  return invoices;
+  
+  
   
 
 // return (

@@ -130,59 +130,31 @@ export async function getUserId() {
   return userId;
 }
 
-
-
-export async function savePlanning(datas : any) {
-  
+export async function savePlanning(datas: any) {
   try {
     const userId = await getUserId();
-       await sql `
-       INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
-       VALUES (
-         ${userId},
-         ${datas.Semaine[0]},
-         ${datas.Lundi},
-         ${datas.Mardi},
-         ${datas.Mercredi},
-         ${datas.Jeudi},
-         ${datas.Vendredi},
-         ${datas.Samedi},
-         ${datas.Dimanche}
-       )
-       ON CONFLICT (user_id, semaine) DO NOTHING;
-  `
 
-  return 'Ajouter réussi'
-  } catch (error) {
-    console.error('Error saving planning:', error);
-  }
-
-  //  try {
-  //   await sql `
-  //   INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
-  //   VALUES (
-  //     ${userId},
-  //     ${datas.Semaine[0]},
-  //     ${datas.Lundi},
-  //     ${datas.Mardi},
-  //     ${datas.Mercredi},
-  //     ${datas.Jeudi},
-  //     ${datas.Vendredi},
-  //     ${datas.Samedi},
-  //     ${datas.Dimanche}
-  //   )
-  //   ON CONFLICT (semaine) DO UPDATE SET
-  //     lundi = EXCLUDED.lundi,
-  //     mardi = EXCLUDED.mardi,
-  //     mercredi = EXCLUDED.mercredi,
-  //     jeudi = EXCLUDED.jeudi,
-  //     vendredi = EXCLUDED.vendredi,
-  //     samedi = EXCLUDED.samedi,
-  //     dimanche = EXCLUDED.dimanche;
-  // `
-  //  } catch (error) {
+    await sql`
+      INSERT INTO planning (user_id, semaine, lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche)
+      VALUES (
+        ${userId},
+        ${datas.semaine[0]},
+        ${JSON.stringify(datas.lundi)},
+        ${JSON.stringify(datas.mardi)},
+        ${JSON.stringify(datas.mercredi)},
+        ${JSON.stringify(datas.jeudi)},
+        ${JSON.stringify(datas.vendredi)},
+        ${JSON.stringify(datas.samedi)},
+        ${JSON.stringify(datas.dimanche)}
+      )
+      ON CONFLICT (user_id, semaine) DO NOTHING;
+    `;
     
-  //  }
+    return 'Ajout réussi';
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du planning :', error);
+    throw new Error('Échec de la sauvegarde du planning.');
+  }
 }
 
 

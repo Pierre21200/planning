@@ -14,14 +14,14 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(bytes)
   
       let horairesParJour: any = {
-        Semaine: [],
-        Lundi: [],
-        Mardi: [],
-        Mercredi: [],
-        Jeudi: [],
-        Vendredi: [],
-        Samedi: [],
-        Dimanche: []
+        semaine: [],
+        lundi: [],
+        mardi: [],
+        mercredi: [],
+        jeudi: [],
+        vendredi: [],
+        samedi: [],
+        dimanche: []
       };
       
     
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
 
       const semaineString = jsonData[0].find((cell : any) => cell && cell.includes('SEMAINE'));
-      horairesParJour.Semaine.push(semaineString)
+      horairesParJour.semaine.push(semaineString)
       // // On récupère la semaine concernée
 
       // On va isoler chaque journée dans un JSON
@@ -174,14 +174,14 @@ export async function POST(request: NextRequest) {
           if(lundiJson[rowIndex][indiceL] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Lundi', i)
-              horairesParJour.Lundi.push(i)
+              horairesParJour.lundi.push(i)
             }  
             consecutive++;
           }   
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Lundi', i)
-              horairesParJour.Lundi.push(i)
+              horairesParJour.lundi.push(i)
             }
             consecutive = 0
              
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
           if(mardiJson[rowIndex][indiceM - 1] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Mardi', i)
-              horairesParJour.Mardi.push(i)
+              horairesParJour.mardi.push(i)
 
             }  
             consecutive++;
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Mardi', i)
-              horairesParJour.Mardi.push(i)
+              horairesParJour.mardi.push(i)
 
             }
             consecutive = 0
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
           if(mercrediJson[rowIndex][indiceM - 1] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Mercredi', i)
-              horairesParJour.Mercredi.push(i)
+              horairesParJour.mercredi.push(i)
 
             }  
             consecutive++;
@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Mercredi', i)
-              horairesParJour.Mercredi.push(i)
+              horairesParJour.mercredi.push(i)
 
             }
             consecutive = 0
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
           if(jeudiJson[rowIndex][indiceJ] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Jeudi', i)
-              horairesParJour.Jeudi.push(i)
+              horairesParJour.jeudi.push(i)
 
             }  
             consecutive++;
@@ -257,7 +257,7 @@ export async function POST(request: NextRequest) {
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Jeudi', i)
-              horairesParJour.Jeudi.push(i)
+              horairesParJour.jeudi.push(i)
 
             }
             consecutive = 0
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
           if(vendrediJson[rowIndex][indiceV - 1] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Vendredi', i)
-              horairesParJour.Vendredi.push(i)
+              horairesParJour.vendredi.push(i)
 
             }  
             consecutive++;
@@ -282,7 +282,7 @@ export async function POST(request: NextRequest) {
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Vendredi', i)
-              horairesParJour.Vendredi.push(i)
+              horairesParJour.vendredi.push(i)
 
             }
             consecutive = 0
@@ -299,7 +299,7 @@ export async function POST(request: NextRequest) {
           if(samediJson[rowIndex][indiceS] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Samedi', i)
-              horairesParJour.Samedi.push(i)
+              horairesParJour.samedi.push(i)
 
             }  
             consecutive++;
@@ -307,7 +307,7 @@ export async function POST(request: NextRequest) {
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Samedi', i)
-              horairesParJour.Samedi.push(i)
+              horairesParJour.samedi.push(i)
 
             }
             consecutive = 0
@@ -325,7 +325,7 @@ export async function POST(request: NextRequest) {
           if(dimancheJson[rowIndex][indiceD - 1] === name) {
             if (consecutive === 0) {
               console.log(rowIndex,'début Dimanche', i)
-              horairesParJour.Dimanche.push(i)
+              horairesParJour.dimanche.push(i)
 
             }  
             consecutive++;
@@ -333,7 +333,7 @@ export async function POST(request: NextRequest) {
           else {
             if (consecutive !== 0) {
               console.log(rowIndex,'fin Dimanche', i)
-              horairesParJour.Dimanche.push(i)
+              horairesParJour.dimanche.push(i)
 
             }
             consecutive = 0

@@ -59,14 +59,14 @@ export type InvoicesTable = {
 
 export type PlanningData = {
   id: string;
-  Semaine: string[];
-  Lundi: number;
-  Mardi: number;
-  Mercredi: number;
-  Jeudi: number;
-  Vendredi: number;
-  Samedi: number;
-  Dimanche: number;
+  semaine: string;
+  lundi: number[];
+  mardi: number[];
+  mercredi: number[];
+  jeudi: number[];
+  vendredi: number[];
+  samedi: number[];
+  dimanche: number[];
 };
 
 export type CustomersTableType = {
