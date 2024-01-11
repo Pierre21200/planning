@@ -41,375 +41,358 @@ export async function POST(request) {
               parsedData.sort((a, b) => a.y - b.y);
               jsonData = JSON.stringify(parsedData, null, 2);
 
-              fs.writeFile('resultat_extraction.json', jsonData, (writeErr) => {
-                if (writeErr) {
-                  console.error(
-                    "Erreur lors de l'écriture du fichier JSON:",
-                    writeErr,
-                  );
+              // on sait que le premier élément du tableau est la semaine concernée
+              horairesParJour.semaine.push(parsedData[0].text);
+
+              // On va ensuite essayer d'établir une range x et y pour chaque journée, on sait qu'elle sera fixe
+              const rl = [
+                { x: 0, y: 3.7 },
+                { x: 25, y: 13.5 },
+              ];
+
+              const rj = [
+                { x: 0, y: 14.3 },
+                { x: 25, y: 24.1 },
+              ];
+
+              const rs = [
+                { x: 0, y: 24.8 },
+                { x: 25, y: 35.3 },
+              ];
+
+              const rm = [
+                { x: 25.1, y: 3.7 },
+                { x: 48, y: 13.5 },
+              ];
+
+              const rv = [
+                { x: 25.1, y: 14.3 },
+                { x: 48, y: 24.1 },
+              ];
+
+              const rd = [
+                { x: 25.1, y: 24.8 },
+                { x: 48, y: 35.3 },
+              ];
+
+              const rme = [
+                { x: 49, y: 3.7 },
+                { x: 72, y: 13.5 },
+              ];
+
+              let lundiElements = [];
+              let mardiElements = [];
+              let mercrediElements = [];
+              let jeudiElements = [];
+              let vendrediElements = [];
+              let samediElements = [];
+              let dimancheElements = [];
+
+              lundiElements = parsedData.filter(
+                (element) =>
+                  rl[0].x < element.x &&
+                  element.x < rl[1].x &&
+                  rl[0].y < element.y &&
+                  element.y < rl[1].y &&
+                  element.text === 'MF',
+              );
+
+              mardiElements = parsedData.filter(
+                (element) =>
+                  rm[0].x < element.x &&
+                  element.x < rm[1].x &&
+                  rm[0].y < element.y &&
+                  element.y < rm[1].y &&
+                  element.text === 'MF',
+              );
+              mercrediElements = parsedData.filter(
+                (element) =>
+                  rme[0].x < element.x &&
+                  element.x < rme[1].x &&
+                  rme[0].y < element.y &&
+                  element.y < rme[1].y &&
+                  element.text === 'MF',
+              );
+
+              jeudiElements = parsedData.filter(
+                (element) =>
+                  rj[0].x < element.x &&
+                  element.x < rj[1].x &&
+                  rj[0].y < element.y &&
+                  element.y < rj[1].y &&
+                  element.text === 'MF',
+              );
+
+              vendrediElements = parsedData.filter(
+                (element) =>
+                  rv[0].x < element.x &&
+                  element.x < rv[1].x &&
+                  rv[0].y < element.y &&
+                  element.y < rv[1].y &&
+                  element.text === 'MF',
+              );
+
+              samediElements = parsedData.filter(
+                (element) =>
+                  rs[0].x < element.x &&
+                  element.x < rs[1].x &&
+                  rs[0].y < element.y &&
+                  element.y < rs[1].y &&
+                  element.text === 'MF',
+              );
+
+              dimancheElements = parsedData.filter(
+                (element) =>
+                  rd[0].x < element.x &&
+                  element.x < rd[1].x &&
+                  rd[0].y < element.y &&
+                  element.y < rd[1].y &&
+                  element.text === 'MF',
+              );
+
+              let x;
+              let y;
+              let debut;
+              let fin;
+
+              // Lundi
+              if (lundiElements.length > 1) {
+                x = lundiElements[1].y - lundiElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.lundi.push(debut);
+
+                lundiElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - lundiElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.lundi.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  lundiElements[lundiElements.length - 1].y -
+                  lundiElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.lundi.length > 1) {
+                  horairesParJour.lundi.push(horairesParJour.lundi[1] + 1);
+                  horairesParJour.lundi.push(fin);
                 } else {
-                  console.log(
-                    'Extraction réussie. Résultat dans le fichier "resultat_extraction.json".',
-                  );
-                  // on sait que le premier élément du tableau est la semaine concernée
-                  horairesParJour.semaine.push(parsedData[0].text);
-
-                  // On va ensuite essayer d'établir une range x et y pour chaque journée, on sait qu'elle sera fixe
-                  const rl = [
-                    { x: 0, y: 3.7 },
-                    { x: 25, y: 13.5 },
-                  ];
-
-                  const rj = [
-                    { x: 0, y: 14.3 },
-                    { x: 25, y: 24.1 },
-                  ];
-
-                  const rs = [
-                    { x: 0, y: 24.8 },
-                    { x: 25, y: 35.3 },
-                  ];
-
-                  const rm = [
-                    { x: 25.1, y: 3.7 },
-                    { x: 48, y: 13.5 },
-                  ];
-
-                  const rv = [
-                    { x: 25.1, y: 14.3 },
-                    { x: 48, y: 24.1 },
-                  ];
-
-                  const rd = [
-                    { x: 25.1, y: 24.8 },
-                    { x: 48, y: 35.3 },
-                  ];
-
-                  const rme = [
-                    { x: 49, y: 3.7 },
-                    { x: 72, y: 13.5 },
-                  ];
-
-                  let lundiElements = [];
-                  let mardiElements = [];
-                  let mercrediElements = [];
-                  let jeudiElements = [];
-                  let vendrediElements = [];
-                  let samediElements = [];
-                  let dimancheElements = [];
-
-                  lundiElements = parsedData.filter(
-                    (element) =>
-                      rl[0].x < element.x &&
-                      element.x < rl[1].x &&
-                      rl[0].y < element.y &&
-                      element.y < rl[1].y &&
-                      element.text === 'MF',
-                  );
-
-                  mardiElements = parsedData.filter(
-                    (element) =>
-                      rm[0].x < element.x &&
-                      element.x < rm[1].x &&
-                      rm[0].y < element.y &&
-                      element.y < rm[1].y &&
-                      element.text === 'MF',
-                  );
-                  mercrediElements = parsedData.filter(
-                    (element) =>
-                      rme[0].x < element.x &&
-                      element.x < rme[1].x &&
-                      rme[0].y < element.y &&
-                      element.y < rme[1].y &&
-                      element.text === 'MF',
-                  );
-
-                  jeudiElements = parsedData.filter(
-                    (element) =>
-                      rj[0].x < element.x &&
-                      element.x < rj[1].x &&
-                      rj[0].y < element.y &&
-                      element.y < rj[1].y &&
-                      element.text === 'MF',
-                  );
-
-                  vendrediElements = parsedData.filter(
-                    (element) =>
-                      rv[0].x < element.x &&
-                      element.x < rv[1].x &&
-                      rv[0].y < element.y &&
-                      element.y < rv[1].y &&
-                      element.text === 'MF',
-                  );
-
-                  samediElements = parsedData.filter(
-                    (element) =>
-                      rs[0].x < element.x &&
-                      element.x < rs[1].x &&
-                      rs[0].y < element.y &&
-                      element.y < rs[1].y &&
-                      element.text === 'MF',
-                  );
-
-                  dimancheElements = parsedData.filter(
-                    (element) =>
-                      rd[0].x < element.x &&
-                      element.x < rd[1].x &&
-                      rd[0].y < element.y &&
-                      element.y < rd[1].y &&
-                      element.text === 'MF',
-                  );
-
-                  let x;
-                  let y;
-                  let debut;
-                  let fin;
-
-                  // Lundi
-                  if (lundiElements.length > 1) {
-                    x = lundiElements[1].y - lundiElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.lundi.push(debut);
-
-                    lundiElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - lundiElements[0].y) / 0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.lundi.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      lundiElements[lundiElements.length - 1].y -
-                      lundiElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.lundi.length > 1) {
-                      horairesParJour.lundi.push(horairesParJour.lundi[1] + 1);
-                      horairesParJour.lundi.push(fin);
-                    } else {
-                      horairesParJour.lundi.push(fin);
-                    }
-                  }
-
-                  // Mardi
-                  if (mardiElements.length > 1) {
-                    x = mardiElements[1].y - mardiElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.mardi.push(debut);
-
-                    mardiElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - mardiElements[0].y) / 0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.mardi.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      mardiElements[mardiElements.length - 1].y -
-                      mardiElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.mardi.length > 1) {
-                      horairesParJour.mardi.push(horairesParJour.mardi[1] + 1);
-                      horairesParJour.mardi.push(fin);
-                    } else {
-                      horairesParJour.mardi.push(fin);
-                    }
-                  }
-
-                  // Mercredi
-                  if (mercrediElements.length > 1) {
-                    x = mercrediElements[1].y - mercrediElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.mercredi.push(debut);
-
-                    mercrediElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - mercrediElements[0].y) /
-                              0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.mercredi.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      mercrediElements[mercrediElements.length - 1].y -
-                      mercrediElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.mercredi.length > 1) {
-                      horairesParJour.mercredi.push(
-                        horairesParJour.mercredi[1] + 1,
-                      );
-                      horairesParJour.mercredi.push(fin);
-                    } else {
-                      horairesParJour.mercredi.push(fin);
-                    }
-                  }
-                  // Jeudi
-                  if (jeudiElements.length > 1) {
-                    x = jeudiElements[1].y - jeudiElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.jeudi.push(debut);
-
-                    jeudiElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - jeudiElements[0].y) / 0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.jeudi.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      jeudiElements[jeudiElements.length - 1].y -
-                      jeudiElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.jeudi.length > 1) {
-                      horairesParJour.jeudi.push(horairesParJour.jeudi[1] + 1);
-                      horairesParJour.jeudi.push(fin);
-                    } else {
-                      horairesParJour.jeudi.push(fin);
-                    }
-                  }
-
-                  // Vendredi
-                  if (vendrediElements.length > 1) {
-                    x = vendrediElements[1].y - vendrediElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.vendredi.push(debut);
-
-                    vendrediElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - vendrediElements[0].y) /
-                              0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.vendredi.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      vendrediElements[vendrediElements.length - 1].y -
-                      vendrediElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.vendredi.length > 1) {
-                      horairesParJour.vendredi.push(
-                        horairesParJour.vendredi[1] + 1,
-                      );
-                      horairesParJour.vendredi.push(fin);
-                    } else {
-                      horairesParJour.vendredi.push(fin);
-                    }
-                  }
-
-                  // Samedi
-                  if (samediElements.length > 1) {
-                    x = samediElements[1].y - samediElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.samedi.push(debut);
-
-                    samediElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - samediElements[0].y) / 0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.samedi.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      samediElements[samediElements.length - 1].y -
-                      samediElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.samedi.length > 1) {
-                      horairesParJour.samedi.push(
-                        horairesParJour.samedi[1] + 1,
-                      );
-                      horairesParJour.samedi.push(fin);
-                    } else {
-                      horairesParJour.samedi.push(fin);
-                    }
-                  }
-
-                  // Dimanche
-                  if (dimancheElements.length > 1) {
-                    x = dimancheElements[1].y - dimancheElements[0].y;
-                    debut = Math.ceil((x / 0.24) * 0.5 + 6);
-                    horairesParJour.dimanche.push(debut);
-                    console.log(debut, 'début dimanche');
-
-                    samediElements
-                      .slice(2) // Exclure les deux premiers éléments
-                      .map((element, index, array) => {
-                        if (index > 0) {
-                          const deltaY = element.y - array[index - 1].y;
-                          if (deltaY > 0.3) {
-                            const a =
-                              (array[index - 1].y - dimancheElements[0].y) /
-                              0.24;
-                            const b = a * 0.5 + 7;
-                            horairesParJour.dimanche.push(Math.round(b));
-                          }
-                        }
-                      });
-
-                    y =
-                      dimancheElements[dimancheElements.length - 1].y -
-                      dimancheElements[0].y;
-                    fin = Math.ceil((y / 0.24) * 0.5 + 6);
-
-                    if (horairesParJour.dimanche.length > 1) {
-                      horairesParJour.dimanche.push(
-                        horairesParJour.dimanche[1] + 1,
-                      );
-                      horairesParJour.dimanche.push(fin);
-                    } else {
-                      horairesParJour.dimanche.push(fin);
-                    }
-                  }
-
-                  resolve();
+                  horairesParJour.lundi.push(fin);
                 }
-              });
+              }
+
+              // Mardi
+              if (mardiElements.length > 1) {
+                x = mardiElements[1].y - mardiElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.mardi.push(debut);
+
+                mardiElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - mardiElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.mardi.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  mardiElements[mardiElements.length - 1].y -
+                  mardiElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.mardi.length > 1) {
+                  horairesParJour.mardi.push(horairesParJour.mardi[1] + 1);
+                  horairesParJour.mardi.push(fin);
+                } else {
+                  horairesParJour.mardi.push(fin);
+                }
+              }
+
+              // Mercredi
+              if (mercrediElements.length > 1) {
+                x = mercrediElements[1].y - mercrediElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.mercredi.push(debut);
+
+                mercrediElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - mercrediElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.mercredi.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  mercrediElements[mercrediElements.length - 1].y -
+                  mercrediElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.mercredi.length > 1) {
+                  horairesParJour.mercredi.push(
+                    horairesParJour.mercredi[1] + 1,
+                  );
+                  horairesParJour.mercredi.push(fin);
+                } else {
+                  horairesParJour.mercredi.push(fin);
+                }
+              }
+              // Jeudi
+              if (jeudiElements.length > 1) {
+                x = jeudiElements[1].y - jeudiElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.jeudi.push(debut);
+
+                jeudiElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - jeudiElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.jeudi.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  jeudiElements[jeudiElements.length - 1].y -
+                  jeudiElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.jeudi.length > 1) {
+                  horairesParJour.jeudi.push(horairesParJour.jeudi[1] + 1);
+                  horairesParJour.jeudi.push(fin);
+                } else {
+                  horairesParJour.jeudi.push(fin);
+                }
+              }
+
+              // Vendredi
+              if (vendrediElements.length > 1) {
+                x = vendrediElements[1].y - vendrediElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.vendredi.push(debut);
+
+                vendrediElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - vendrediElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.vendredi.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  vendrediElements[vendrediElements.length - 1].y -
+                  vendrediElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.vendredi.length > 1) {
+                  horairesParJour.vendredi.push(
+                    horairesParJour.vendredi[1] + 1,
+                  );
+                  horairesParJour.vendredi.push(fin);
+                } else {
+                  horairesParJour.vendredi.push(fin);
+                }
+              }
+
+              // Samedi
+              if (samediElements.length > 1) {
+                x = samediElements[1].y - samediElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.samedi.push(debut);
+
+                samediElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - samediElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.samedi.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  samediElements[samediElements.length - 1].y -
+                  samediElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.samedi.length > 1) {
+                  horairesParJour.samedi.push(horairesParJour.samedi[1] + 1);
+                  horairesParJour.samedi.push(fin);
+                } else {
+                  horairesParJour.samedi.push(fin);
+                }
+              }
+
+              // Dimanche
+              if (dimancheElements.length > 1) {
+                x = dimancheElements[1].y - dimancheElements[0].y;
+                debut = Math.ceil((x / 0.24) * 0.5 + 6);
+                horairesParJour.dimanche.push(debut);
+                console.log(debut, 'début dimanche');
+
+                samediElements
+                  .slice(2) // Exclure les deux premiers éléments
+                  .map((element, index, array) => {
+                    if (index > 0) {
+                      const deltaY = element.y - array[index - 1].y;
+                      if (deltaY > 0.3) {
+                        const a =
+                          (array[index - 1].y - dimancheElements[0].y) / 0.24;
+                        const b = a * 0.5 + 7;
+                        horairesParJour.dimanche.push(Math.round(b));
+                      }
+                    }
+                  });
+
+                y =
+                  dimancheElements[dimancheElements.length - 1].y -
+                  dimancheElements[0].y;
+                fin = Math.ceil((y / 0.24) * 0.5 + 6);
+
+                if (horairesParJour.dimanche.length > 1) {
+                  horairesParJour.dimanche.push(
+                    horairesParJour.dimanche[1] + 1,
+                  );
+                  horairesParJour.dimanche.push(fin);
+                } else {
+                  horairesParJour.dimanche.push(fin);
+                }
+              }
+
+              resolve();
             } else if (item.text) {
               // Ajouter les données extraites au tableau
               parsedData.push({
