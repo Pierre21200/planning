@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest , NextResponse } from 'next/server';
 import { PdfReader } from 'pdfreader';
 import fs from 'fs';
-import { set } from 'zod';
 const xlsx = require('xlsx');
 
-const parsedData = [];
+const parsedData : any = [];
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   const data = await request.formData();
   const file = data.get('file');
 
@@ -27,7 +26,7 @@ export async function POST(request) {
 
   if (file.name.toLowerCase().endsWith('.pdf')) {
     try {
-      async function extraireDonneesDuPDF(file) {
+      async function extraireDonneesDuPDF(file : any) {
         const pdfBuffer = Buffer.from(await file.arrayBuffer());
 
         const promesseTraitement = new Promise((resolve, reject) => {
