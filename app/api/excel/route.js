@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PdfReader } from 'pdfreader';
 import fs from 'fs';
 const xlsx = require('xlsx');
-
-const parsedData = [];
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function POST(request) {
+  const parsedData = [];
+  noStore();
   const data = await request.formData();
   const file = data.get('file');
 
@@ -24,6 +25,8 @@ export async function POST(request) {
     dimanche: [],
   };
 
+  let jsonData = '';
+
   if (file.name.toLowerCase().endsWith('.pdf')) {
     try {
       async function extraireDonneesDuPDF(file) {
@@ -36,7 +39,7 @@ export async function POST(request) {
             } else if (!item) {
               // Fin du buffer, écrire les données dans un fichier JSON
               parsedData.sort((a, b) => a.y - b.y);
-              const jsonData = JSON.stringify(parsedData, null, 2);
+              jsonData = JSON.stringify(parsedData, null, 2);
 
               fs.writeFile('resultat_extraction.json', jsonData, (writeErr) => {
                 if (writeErr) {
@@ -55,7 +58,7 @@ export async function POST(request) {
                   const rl = [
                     { x: 0, y: 3.7 },
                     { x: 25, y: 13.5 },
-                  ]; // range lundi x (0, 25), y (3.7, 13.5)
+                  ];
 
                   const rj = [
                     { x: 0, y: 14.3 },
@@ -87,7 +90,15 @@ export async function POST(request) {
                     { x: 72, y: 13.5 },
                   ];
 
-                  const lundiElements = parsedData.filter(
+                  let lundiElements = [];
+                  let mardiElements = [];
+                  let mercrediElements = [];
+                  let jeudiElements = [];
+                  let vendrediElements = [];
+                  let samediElements = [];
+                  let dimancheElements = [];
+
+                  lundiElements = parsedData.filter(
                     (element) =>
                       rl[0].x < element.x &&
                       element.x < rl[1].x &&
@@ -96,7 +107,7 @@ export async function POST(request) {
                       element.text === 'MF',
                   );
 
-                  const mardiElements = parsedData.filter(
+                  mardiElements = parsedData.filter(
                     (element) =>
                       rm[0].x < element.x &&
                       element.x < rm[1].x &&
@@ -104,7 +115,7 @@ export async function POST(request) {
                       element.y < rm[1].y &&
                       element.text === 'MF',
                   );
-                  const mercrediElements = parsedData.filter(
+                  mercrediElements = parsedData.filter(
                     (element) =>
                       rme[0].x < element.x &&
                       element.x < rme[1].x &&
@@ -113,7 +124,7 @@ export async function POST(request) {
                       element.text === 'MF',
                   );
 
-                  const jeudiElements = parsedData.filter(
+                  jeudiElements = parsedData.filter(
                     (element) =>
                       rj[0].x < element.x &&
                       element.x < rj[1].x &&
@@ -122,7 +133,7 @@ export async function POST(request) {
                       element.text === 'MF',
                   );
 
-                  const vendrediElements = parsedData.filter(
+                  vendrediElements = parsedData.filter(
                     (element) =>
                       rv[0].x < element.x &&
                       element.x < rv[1].x &&
@@ -131,7 +142,7 @@ export async function POST(request) {
                       element.text === 'MF',
                   );
 
-                  const samediElements = parsedData.filter(
+                  samediElements = parsedData.filter(
                     (element) =>
                       rs[0].x < element.x &&
                       element.x < rs[1].x &&
@@ -140,7 +151,7 @@ export async function POST(request) {
                       element.text === 'MF',
                   );
 
-                  const dimancheElements = parsedData.filter(
+                  dimancheElements = parsedData.filter(
                     (element) =>
                       rd[0].x < element.x &&
                       element.x < rd[1].x &&
@@ -364,6 +375,7 @@ export async function POST(request) {
                     x = dimancheElements[1].y - dimancheElements[0].y;
                     debut = Math.ceil((x / 0.24) * 0.5 + 6);
                     horairesParJour.dimanche.push(debut);
+                    console.log(debut, 'début dimanche');
 
                     samediElements
                       .slice(2) // Exclure les deux premiers éléments
@@ -418,9 +430,15 @@ export async function POST(request) {
       }
 
       await extraireDonneesDuPDF(file);
-
+      console.log(horairesParJour);
       return NextResponse.json(horairesParJour);
-    } catch (error) {}
+    } catch (error) {
+      console.error('Erreur lors du traitement du fichier PDF :', error);
+      return NextResponse.error({
+        status: 500,
+        message: 'Erreur lors du traitement du fichier PDF.',
+      });
+    }
   } else if (file.name.toLowerCase().endsWith('.xlsx')) {
     try {
       const bytes = await file.arrayBuffer();
@@ -726,8 +744,13 @@ export async function POST(request) {
       console.log(horairesParJour);
 
       return NextResponse.json(horairesParJour);
-    } catch (error) {}
+    } catch (error) {
+      console.error('Erreur lors du traitement du fichier PDF :', error);
+      return NextResponse.error({
+        status: 500,
+        message: 'Erreur lors du traitement du fichier PDF.',
+      });
+    }
     // Fichier Excel
-    console.log("C'est un fichier Excel (XLSX).");
   }
 }
