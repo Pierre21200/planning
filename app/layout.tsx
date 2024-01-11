@@ -1,7 +1,7 @@
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
-import { NextAuthProvider } from "./providers";
+
 
 export const metadata: Metadata = {
   title: {
@@ -20,9 +20,8 @@ export default function RootLayout({
   return (
      <html lang="fr">
       <body className={`${inter.className} antialiased`}>
-      {/* <NextAuthProvider> */}
         {children}
-        {/* </NextAuthProvider>         */}
+
         </body>
     </html>
  
