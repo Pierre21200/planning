@@ -1,5 +1,4 @@
 export default function WeekDays({ data, my }) {
-  console.log(data, 'oui');
   const weekDays = [
     'lundi',
     'mardi',

@@ -11,6 +11,7 @@ import Planning from '@/app/ui/planning'
 import {fetchFilteredInvoices} from  '@/app/lib/data'
 import WeekDays from '@/app/ui/WeekDays';
 import Plan from '@/app/ui/plan'
+import { useState } from 'react';
 
 export const metadata: Metadata = {
   title: 'Acceuil',
@@ -29,6 +30,8 @@ export default async function Page({
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const data = await fetchFilteredInvoices();
+
+
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-center mt-10">
@@ -40,7 +43,7 @@ export default async function Page({
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
 
-          {data.map((item: any) => {
+          {data.slice().reverse().map((item: any) => {
         return (
           <WeekDays key={item.id} data={item} my={true}></WeekDays>
         );

@@ -13,6 +13,7 @@ const Planning = ({ data }) => {
     const response = await savePlanning(datas);
     if (response === 'Ajout réussi') {
       setEnr(true);
+      window.location.reload();
     }
   };
 

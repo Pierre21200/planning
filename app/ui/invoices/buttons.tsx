@@ -30,8 +30,9 @@ export function CreateInvoice() {
 
 
       const responseData = await response.json();
-
+      console.log(responseData)
       setData(responseData);
+
     } catch (error) {
       console.error("Erreur lors de la requête d'upload :", error);
     }

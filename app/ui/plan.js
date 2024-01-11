@@ -12,6 +12,4 @@ export default function Plan({ data }) {
   joursSemaine.forEach((jour) => {
     data[jour] = JSON.parse(data[jour]);
   });
-
-  console.log(data);
 }
