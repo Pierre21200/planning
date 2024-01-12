@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PdfReader } from 'pdfreader';
-import fs from 'fs';
 const xlsx = require('xlsx');
-import { unstable_noStore as noStore } from 'next/cache';
 
 export async function POST(request) {
   const parsedData = [];
-  noStore();
   const data = await request.formData();
   const file = data.get('file');
 
@@ -24,9 +21,7 @@ export async function POST(request) {
     samedi: [],
     dimanche: [],
   };
-
   let jsonData = '';
-
   if (file.name.toLowerCase().endsWith('.pdf')) {
     try {
       async function extraireDonneesDuPDF(file) {
